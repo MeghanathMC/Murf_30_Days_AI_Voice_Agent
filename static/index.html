@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Hello AI </title>
-</head>
-<body>
+  <head>
+    <title>Hello AI</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
     <h1>Building Voice AI Agent From Scratch</h1>
 
-    <div style="display:flex; flex-direction:column; gap:10px; width: 20%;">
-        <input type="text" id="inputText" placeholder="enter your text" style="width: 300px; height: 30px; margin-bottom: 10px;"> 
-    <button onclick="generateAudio()">
-        Generate Voice
-    </button>
-
-    <audio id="audioPlayer" controls style="margin-top: 10px; display: none;" ></audio> 
+    <div id="container">
+      <input type="text" id="inputText" placeholder="enter your text" />
+      <button onclick="generateAudio()">Generate Voice</button>
+      <audio
+        id="audioPlayer"
+        controls
+        style="margin-top: 10px; display: none"
+      ></audio>
     </div>
-
 
     <!-- <button onclick="sayHello()">Click Me</button> -->
     <script src="/static/script.js"></script>
-</body>
+  </body>
 </html>
