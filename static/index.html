@@ -1,23 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Hello AI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo Bot</title>
     <link rel="stylesheet" href="/static/style.css">
   </head>
   <body>
-    <h1>Building Voice AI Agent From Scratch</h1>
+    <div class="app-container">
+      <h1>Echo Bot</h1>
+      
+      <div id="container" class="section-container">
+        <h2>Text to Speech</h2>
+        <input type="text" id="inputText" placeholder="Enter your text..." />
+        <button onclick="generateAudio()" class="primary-button">Generate Voice</button>
+        <audio id="audioPlayer" controls style="display: none"></audio>
+      </div>
 
-    <div id="container">
-      <input type="text" id="inputText" placeholder="enter your text" />
-      <button onclick="generateAudio()">Generate Voice</button>
-      <audio
-        id="audioPlayer"
-        controls
-        style="margin-top: 10px; display: none"
-      ></audio>
+      <div id="echoContainer" class="section-container">
+        <h2>Echo Bot</h2>
+        <div class="button-group">
+          <button id="startrecording" class="record-button">
+            <!-- <span class="button-icon">🎤</span> -->
+            Start Recording
+          </button>
+          <button id="stoprecording" class="record-button" disabled>
+            <!-- <span class="button-icon">⏹</span> -->
+            Stop Recording
+          </button>
+        </div>
+        <audio id="playback" controls></audio>
+          <p id="uploadStatus" class="upload-status">Upload Status will be displayed here</p>
+       
+      </div>
     </div>
 
-    <!-- <button onclick="sayHello()">Click Me</button> -->
     <script src="/static/script.js"></script>
   </body>
 </html>

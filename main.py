@@ -3,6 +3,9 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from fastapi import File, UploadFile
+import shutil
+from pathlib import Path
 import httpx
 import os
 
@@ -10,6 +13,26 @@ load_dotenv()
 
 MURF_API_KEY =os.getenv("MURF_API_KEY")
 app = FastAPI()
+
+#upload audio file to directory
+
+UPLOAD_DIR= Path("uploads")
+
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+@app.post("/upload")
+async def upload_audio(file: UploadFile = File(...)):
+    file_path = UPLOAD_DIR / file.filename
+    with file_path.open("wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    file_size = file_path.stat().st_size
+
+    return {
+        "filename": file.filename,
+        "content_type": file.content_type,
+        "size": file_size
+    }
 
 # Serve static files (JS, CSS, etc.)
 app.mount("/static", StaticFiles(directory="static"), name="static")
