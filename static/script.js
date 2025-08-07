@@ -33,161 +33,93 @@ async function generateAudio() {
 }
 
 // Echo Bot functionality
-console.log('Script loaded and initializing...');
-
 let mediaRecorder = null;
 let audioStream = null;
 let audioChunks = [];
 
-// Get DOM elements
 const startButton = document.getElementById('startrecording');
 const stopButton = document.getElementById('stoprecording');
 const audioPlayer = document.getElementById('playback');
 const uploadStatus = document.getElementById('uploadStatus');
+const transcriptionContainer = document.getElementById('transcription-container');
+const transcriptionText = document.getElementById('transcription-text');
 
-console.log('DOM Elements:', {
-    startButton: !!startButton,
-    stopButton: !!stopButton,
-    audioPlayer: !!audioPlayer,
-    uploadStatus: !!uploadStatus
-});
-
-// Function to update UI state
 function updateUIState(isRecording) {
-    console.log('Updating UI state, isRecording:', isRecording);
     startButton.disabled = isRecording;
     stopButton.disabled = !isRecording;
     
-    startButton.innerHTML = `<span class="button-icon">🎤</span>${isRecording ? 'Recording...' : 'Start Recording'}`;
+    startButton.innerHTML = `<span>${isRecording ? 'Recording...' : 'Start Recording'}</span>`;
     if (isRecording) {
         startButton.classList.add('recording');
+        transcriptionContainer.style.display = 'none';
+        uploadStatus.textContent = 'Recording in progress...';
     } else {
         startButton.classList.remove('recording');
     }
 }
 
+async function transcribeAudio(audioBlob) {
+    uploadStatus.textContent = 'Transcribing...';
+    const formData = new FormData();
+    formData.append('file', audioBlob, 'recording.webm');
 
-async function uploadAudioFile(audioBlob) {
     try {
-        console.log('Starting upload...');
-        uploadStatus.textContent = "Uploading...";
-        uploadStatus.className = "upload-status uploading";
-
-        const formData = new FormData();
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `recording_${timestamp}.webm`;
-        
-        formData.append("file", audioBlob, filename);
-
-        const response = await fetch("/upload", {
-            method: "POST",
-            body: formData
+        const response = await fetch('/transcribe/file', {
+            method: 'POST',
+            body: formData,
         });
 
         if (!response.ok) {
-            throw new Error(`Upload failed: ${response.status}`);
+            throw new Error(`Transcription failed: ${response.statusText}`);
         }
 
         const data = await response.json();
-        console.log("Upload successful:", data);
-        
-        const fileSizeKB = (data.size / 1024).toFixed(1);
-        uploadStatus.textContent = ` Uploaded: ${data.filename} (${fileSizeKB} KB)`;
-        uploadStatus.className = "upload-status success";
-        
-        return data;
+        transcriptionText.textContent = data.transcription;
+        transcriptionContainer.style.display = 'block';
+        uploadStatus.textContent = 'Transcription complete!';
     } catch (error) {
-        console.error("Upload failed:", error);
-        uploadStatus.textContent = " Upload failed: " + error.message;
-        uploadStatus.className = "upload-status error";
-        throw error;
+        console.error('Transcription error:', error);
+        uploadStatus.textContent = 'Transcription failed.';
     }
 }
 
-// Function to handle recording start
 async function startRecording() {
-    console.log('Start recording clicked');
     try {
-        console.log('Requesting microphone access...');
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        console.log('Microphone access granted');
-        
-        audioStream = stream;
+        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(audioStream);
         audioChunks = [];
-        
-        // Reset upload status
-        uploadStatus.textContent = "Ready to record";
-        uploadStatus.className = "upload-status";
-        
-        // Create media recorder
-        mediaRecorder = new MediaRecorder(stream);
-        console.log('MediaRecorder created:', mediaRecorder.state);
 
-        // Handle data available event
-        mediaRecorder.addEventListener('dataavailable', event => {
-            console.log('Data available event:', event.data.size, 'bytes');
+        mediaRecorder.ondataavailable = event => {
             audioChunks.push(event.data);
-        });
+        };
 
-        // Handle recording stop
-        mediaRecorder.addEventListener('stop', async () => {
-            console.log('Recording stopped, processing audio...');
+        mediaRecorder.onstop = async () => {
             const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
             const audioUrl = URL.createObjectURL(audioBlob);
             audioPlayer.src = audioUrl;
-            
-            console.log('Audio processed and ready for playback');
-            updateUIState(false);   
-            
-            // Stop all tracks
-            audioStream.getTracks().forEach(track => {
-                track.stop();
-                console.log('Audio track stopped');
-            });
 
-            // Upload the audio file
-            try {
-                await uploadAudioFile(audioBlob);
-            } catch (error) {
-                console.error('Upload error:', error);
-            }
-        });
+            await transcribeAudio(audioBlob);
+            
+            audioStream.getTracks().forEach(track => track.stop());
+        };
 
-        // Start recording
         mediaRecorder.start();
-        console.log('Recording started, MediaRecorder state:', mediaRecorder.state);
         updateUIState(true);
-
     } catch (error) {
-        console.error('Error in startRecording:', error);
-        alert('Could not access microphone - please ensure you have granted permission');
+        console.error('Error starting recording:', error);
+        alert('Could not access microphone. Please grant permission and try again.');
         updateUIState(false);
     }
 }
 
-// Function to handle recording stop
 function stopRecording() {
-    console.log('Stop recording clicked');
     if (mediaRecorder && mediaRecorder.state === 'recording') {
-        console.log('Stopping recording...');
         mediaRecorder.stop();
-    } else {
-        console.log('MediaRecorder not active:', mediaRecorder?.state);
+        updateUIState(false);
     }
 }
 
-// Add event listeners when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM Content Loaded, setting up event listeners');
-    
-    if (startButton && stopButton) {
-        startButton.addEventListener('click', startRecording);
-        stopButton.addEventListener('click', stopRecording);
-        console.log('Event listeners attached successfully');
-    } else {
-        console.error('Required buttons not found in DOM');
-    }
+    startButton.addEventListener('click', startRecording);
+    stopButton.addEventListener('click', stopRecording);
 });
-
-// Log if MediaRecorder is supported
-console.log('MediaRecorder supported:', 'MediaRecorder' in window);

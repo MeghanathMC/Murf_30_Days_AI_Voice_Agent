@@ -148,6 +148,28 @@ h2 {
     font-size: 1.2em;
 }
 
+/* Transcription Container */
+.transcription-container {
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px;
+    background: #f7fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.transcription-container h3 {
+    margin: 0 0 10px 0;
+    color: #4a5568;
+}
+
+#transcription-text {
+    font-size: 1rem;
+    color: #2d3748;
+    line-height: 1.5;
+}
+
 /* Upload status styles */
 .upload-status {
     padding: 10px 15px;

@@ -1,40 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Echo Bot</title>
     <link rel="stylesheet" href="/static/style.css">
-  </head>
-  <body>
+</head>
+<body>
     <div class="app-container">
-      <h1>Echo Bot</h1>
-      
-      <div id="container" class="section-container">
-        <h2>Text to Speech</h2>
-        <input type="text" id="inputText" placeholder="Enter your text..." />
-        <button onclick="generateAudio()" class="primary-button">Generate Voice</button>
-        <audio id="audioPlayer" controls style="display: none"></audio>
-      </div>
+        <h1>Echo Bot</h1>
 
-      <div id="echoContainer" class="section-container">
-        <h2>Echo Bot</h2>
-        <div class="button-group">
-          <button id="startrecording" class="record-button">
-            <!-- <span class="button-icon">🎤</span> -->
-            Start Recording
-          </button>
-          <button id="stoprecording" class="record-button" disabled>
-            <!-- <span class="button-icon">⏹</span> -->
-            Stop Recording
-          </button>
+        <div id="container" class="section-container">
+            <h2>Text to Speech</h2>
+            <input type="text" id="inputText" placeholder="Enter your text...">
+            <button onclick="generateAudio()" class="primary-button">Generate Voice</button>
+            <audio id="audioPlayer" controls style="display: none;"></audio>
         </div>
-        <audio id="playback" controls></audio>
-          <p id="uploadStatus" class="upload-status">Upload Status will be displayed here</p>
-       
-      </div>
+
+        <div id="echoContainer" class="section-container">
+            <h2>Echo Bot</h2>
+            <div class="button-group">
+                <button id="startrecording" class="record-button">Start Recording</button>
+                <button id="stoprecording" class="record-button" disabled>Stop Recording</button>
+            </div>
+            <audio id="playback" controls></audio>
+            <p id="uploadStatus" class="upload-status">Ready to record</p>
+            <div id="transcription-container" class="transcription-container" style="display: none;">
+                <h3>Transcription:</h3>
+                <p id="transcription-text"></p>
+            </div>
+        </div>
     </div>
 
     <script src="/static/script.js"></script>
-  </body>
+</body>
 </html>
