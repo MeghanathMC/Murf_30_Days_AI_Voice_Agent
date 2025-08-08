@@ -58,28 +58,35 @@ function updateUIState(isRecording) {
     }
 }
 
-async function transcribeAudio(audioBlob) {
-    uploadStatus.textContent = 'Transcribing...';
+async function echoWithMurfVoice(audioBlob) {
+    uploadStatus.textContent = 'Transcribing and generating Murf voice...';
     const formData = new FormData();
     formData.append('file', audioBlob, 'recording.webm');
 
     try {
-        const response = await fetch('/transcribe/file', {
+        const response = await fetch('/tts/echo', {
             method: 'POST',
             body: formData,
         });
 
         if (!response.ok) {
-            throw new Error(`Transcription failed: ${response.statusText}`);
+            throw new Error(`Echo failed: ${response.statusText}`);
         }
 
         const data = await response.json();
+        
+        // Display the transcription
         transcriptionText.textContent = data.transcription;
         transcriptionContainer.style.display = 'block';
-        uploadStatus.textContent = 'Transcription complete!';
+        
+        // Play the Murf voice audio
+        audioPlayer.src = data.audio_url;
+        audioPlayer.play();
+        
+        uploadStatus.textContent = 'Echo complete! Playing Murf voice...';
     } catch (error) {
-        console.error('Transcription error:', error);
-        uploadStatus.textContent = 'Transcription failed.';
+        console.error('Echo error:', error);
+        uploadStatus.textContent = 'Echo failed.';
     }
 }
 
@@ -95,10 +102,9 @@ async function startRecording() {
 
         mediaRecorder.onstop = async () => {
             const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            audioPlayer.src = audioUrl;
-
-            await transcribeAudio(audioBlob);
+            
+            // Use the new echo endpoint instead of just transcription
+            await echoWithMurfVoice(audioBlob);
             
             audioStream.getTracks().forEach(track => track.stop());
         };

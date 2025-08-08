@@ -58,6 +58,71 @@ async def transcribe_audio_file(file: UploadFile = File(...)):
         print(f"Error during transcription: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Echo TTS endpoint - transcribe audio and generate Murf voice
+@app.post("/tts/echo")
+async def echo_tts(file: UploadFile = File(...)):
+    if not ASSEMBLYAI_API_KEY or not MURF_API_KEY:
+        raise HTTPException(status_code=500, detail="API_KEYS_NOT_FOUND")
+
+    try:
+        # Save the uploaded file temporarily
+        temp_dir = Path("temp_uploads")
+        temp_dir.mkdir(exist_ok=True)
+        file_path = temp_dir / file.filename
+        
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        # Step 1: Transcribe the audio using AssemblyAI
+        transcriber = aai.Transcriber()
+        transcript = transcriber.transcribe(str(file_path))
+
+        # Clean up the temporary file
+        os.remove(file_path)
+
+        if transcript.status == aai.TranscriptStatus.error:
+            raise HTTPException(status_code=500, detail=f"Transcription error: {transcript.error}")
+
+        transcription_text = transcript.text
+        print(f"Transcription: {transcription_text}")
+
+        # Step 2: Generate Murf voice from transcription
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "api-key": MURF_API_KEY
+        }
+        
+        payload = {
+            "text": transcription_text,
+            "style": "Conversational",
+            "multiNativeLocale": "en-US",
+            "speed": 1.0,
+            "pitch": 1.0,
+            "volume": 1.0,
+            "language": "en-US",
+            "voice_id": "en-US-natalie"  # You can change this to any available voice
+        }
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.murf.ai/v1/speech/generate",
+                headers=headers,
+                json=payload
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            audio_url = data.get("audioFile")
+            if not audio_url:
+                raise HTTPException(status_code=500, detail="No audio URL received from Murf API")
+
+            return {"audio_url": audio_url, "transcription": transcription_text}
+    
+    except Exception as e:
+        print(f"Error in echo TTS: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # TTS Request Model
 class TTSRequest(BaseModel):
     text: str
