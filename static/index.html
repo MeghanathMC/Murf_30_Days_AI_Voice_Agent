@@ -1,38 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Echo Bot</title>
+    <title>AI Voice Assistant</title>
     <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
     <div class="app-container">
-        <h1>Echo Bot</h1>
-
-        <div id="container" class="section-container">
-            <h2>Text to Speech</h2>
-            <input type="text" id="inputText" placeholder="Enter your text...">
-            <button onclick="generateAudio()" class="primary-button">Generate Voice</button>
-            <audio id="audioPlayer" controls style="display: none;"></audio>
-        </div>
-
-        <div id="echoContainer" class="section-container">
-            <h2>Echo Bot - Murf Voice</h2>
-            <p class="echo-description">Record your voice and hear it repeated back in Murf's voice!</p>
-            <div class="button-group">
-                <button id="startrecording" class="record-button">Start Recording</button>
-                <button id="stoprecording" class="record-button" disabled>Stop Recording</button>
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+                        <path d="M19.5 10.5L20.44 15.32L24 16L20.44 16.68L19.5 21.5L18.56 16.68L15 16L18.56 15.32L19.5 10.5Z" fill="currentColor"/>
+                        <path d="M4.5 3.5L5.44 8.32L9 9L5.44 9.68L4.5 14.5L3.56 9.68L0 9L3.56 8.32L4.5 3.5Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>Voice AI</h1>
+                    <p>Conversational Assistant</p>
+                </div>
             </div>
-            <audio id="playback" controls></audio>
-            <p id="uploadStatus" class="upload-status">Ready to record</p>
-            <div id="transcription-container" class="transcription-container" style="display: none;">
-                <h3>What you said:</h3>
-                <p id="transcription-text"></p>
+        </header>
+
+        <!-- Main Chat Interface -->
+        <main class="chat-container">
+            <!-- Status Display -->
+            <div class="status-container">
+                <div id="status-indicator" class="status-indicator ready">
+                    <div class="status-dot"></div>
+                    <span id="status-text">Ready to listen</span>
+                </div>
             </div>
-        </div>
+
+            <!-- Voice Control Button -->
+            <div class="voice-control-container">
+                <button id="voice-button" class="voice-button" aria-label="Start voice conversation">
+                    <div class="voice-button-inner">
+                        <div class="voice-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 1C11.73 1 11.48 1.11 11.29 1.29L12 2V1ZM12 1C12.27 1 12.52 1.11 12.71 1.29L12 2V1Z" fill="currentColor"/>
+                                <path d="M12 2C9.79 2 8 3.79 8 6V12C8 14.21 9.79 16 12 16C14.21 16 16 14.21 16 12V6C16 3.79 14.21 2 12 2Z" fill="currentColor"/>
+                                <path d="M19 11V12C19 16.42 15.42 20 11 20V22H13V24H11H13H11V22H13C16.87 22 20 18.87 20 15V11H19Z" fill="currentColor"/>
+                                <path d="M5 11V12C5 15.87 8.13 19 12 19V21H10V23H14V21H12C7.58 21 4 17.42 4 13V11H5Z" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <div class="recording-animation">
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-ring pulse-ring-delay-1"></div>
+                            <div class="pulse-ring pulse-ring-delay-2"></div>
+                        </div>
+                    </div>
+                </button>
+                <p class="voice-button-hint">Tap to speak with AI</p>
+            </div>
+
+            <!-- Conversation Display -->
+            <div id="conversation-display" class="conversation-display">
+                <div class="conversation-header">
+                    <h3>Conversation</h3>
+                    <button id="clear-conversation" class="clear-button" aria-label="Clear conversation">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="conversation-content" class="conversation-content">
+                    <div class="welcome-message">
+                        <div class="welcome-icon">👋</div>
+                        <h4>Welcome!</h4>
+                        <p>Tap the microphone button below to start a conversation with your AI assistant.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Hidden Audio Player -->
+        <audio id="ai-audio" preload="auto"></audio>
     </div>
 
     <script src="/static/script.js"></script>
-</body>
+  </body>
 </html>
